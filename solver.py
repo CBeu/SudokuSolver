@@ -169,10 +169,48 @@ class Solver:
 
     def update(self):
         update_methods = [self.puzzle.updateSquares, self.puzzle.updateBox, self.puzzle.updateRow, self.puzzle.updateCol]
+        solveStrategies = [self.nakedPair]
         for method in update_methods:
             method()
             if self.puzzle.isSolved():
                 return
+        for strategy in solveStrategies:
+            strategy()
+            if self.puzzle.isSolved():
+                return
+
+    def nakedPair(self):
+        for box in range(9):
+            selectedBox = self.puzzle.getBox(box)
+            for square in selectedBox:
+                nakedPairCount = 0
+                if len(square.possibleValues) == 2:
+                    for otherSquare in selectedBox:
+                        if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
+                            nakedPairCount += 1
+                if nakedPairCount > 0:
+                    print("Box ",box," Naked pair count: ", nakedPairCount)
+        for row in range(9):
+            selectedRow = self.puzzle.getRow(row)
+            for square in selectedRow:
+                nakedPairCount = 0
+                if len(square.possibleValues) == 2:
+                    for otherSquare in selectedRow:
+                        if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
+                            nakedPairCount += 1
+                if nakedPairCount > 0:
+                    print("Row ",row," Naked pair count: ", nakedPairCount)
+        for col in range(9):
+            selectedCol = self.puzzle.getCol(col)
+            for square in selectedCol:
+                nakedPairCount = 0
+                if len(square.possibleValues) == 2:
+                    for otherSquare in selectedRow:
+                        if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
+                            nakedPairCount += 1
+                if nakedPairCount > 0:
+                    print("Col ",col," Naked pair count: ", nakedPairCount)
+        pass
 
     def solve(self):
         loopCount = 0
@@ -185,12 +223,6 @@ class Solver:
                 print("Puzzle cannot be solved with current algorithm. Please try a different puzzle.")
                 break
             self.puzzle.updated = False
-            # while True:
-            #     proceed = input("Type 'y' to continue: ").lower()
-            #     if proceed == 'y':
-            #         break
-            #     else:
-            #         print("Invalid input. Please type 'y' to continue.")
         pass
     
 
@@ -205,6 +237,7 @@ def main():
                       [0,8,0,0,5,1,0,9,0],
                       [2,0,0,0,0,3,8,0,0],
                       [0,7,1,9,0,0,6,3,0]]
+
     hardPuzzleRows = [[0,0,0,9,3,4,1,0,5],
                       [3,0,0,0,0,0,0,0,0],
                       [0,4,0,8,0,5,0,9,3],
@@ -215,6 +248,16 @@ def main():
                       [0,8,0,7,9,1,0,0,4],
                       [7,0,0,0,0,0,0,0,0]]
     
+    nakedPairRows = [[4,0,0,2,7,0,6,0,0],
+                     [7,9,8,1,5,6,2,3,4],
+                     [0,2,0,8,4,0,0,0,7],
+                     [2,3,7,4,6,8,9,5,1],
+                     [8,4,9,5,3,1,7,2,6],
+                     [5,6,1,7,9,2,8,4,3],
+                     [0,8,2,0,1,5,4,7,9],
+                     [0,7,0,0,2,4,3,0,0],
+                     [0,0,4,0,8,7,0,0,2]]
+    
     choice = input("Enter Type 'y' to enter a row manually or 'n' to use a hard-coded puzzle: ").lower()
     if choice == 'y':
         for i in range(9):
@@ -222,11 +265,13 @@ def main():
             row = [int(i) for i in row]
             rows.append(row)
     elif choice == 'n':
-        choice = input("Enter 'y' to use the easy puzzle or 'n' to use hard: ").lower()
-        if choice == 'y':
+        choice = input("Enter '1' to use the easy puzzle or '2' to use hard or 3 to use naked pair: ").lower()
+        if choice == '1':
             rows = easyPuzzleRows
-        elif choice == 'n':
+        elif choice == '2':
             rows = hardPuzzleRows
+        elif choice == '3':
+            rows = nakedPairRows
     else: 
         print("Invalid input. Please type 'y' or 'n'.")
         return
