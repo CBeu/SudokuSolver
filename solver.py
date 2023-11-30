@@ -94,63 +94,30 @@ class SudokuPuzzle:
         pass
 
     def updateBox(self):
-        #list all possible values in box (1.....9) use dictionary to keep track of how many times each value appears
-        #if a possible value appears only once, set self.value to that value and return
-        for box in range(9):
+        self.updatePuzzle(self.getBox)
+
+    def updateRow(self):
+        self.updatePuzzle(self.getRow)
+        pass
+
+    def updateCol(self):
+        self.updatePuzzle(self.getCol)
+        pass
+
+    def updatePuzzle(self, func):
+        for i in range(9):
             value_counts = {i: 0 for i in range(1, 10)}
-            box = self.getBox(box)
-            for square in box:
+            squares = func(i)
+            for square in squares:
                 if len(square.possibleValues) == 1:
                     continue
                 for possibleValue in square.possibleValues:
                     value_counts[possibleValue] += 1
-            for square in box:
+            for square in squares:
                 if len(square.possibleValues) == 1:
                     continue
                 for possibleValue in square.possibleValues:
                     if value_counts[possibleValue] == 1 and square.value == 0:
-                        square.value = possibleValue
-                        square.possibleValues = [possibleValue]
-                        square.squareUpdated = True
-                        self.updated = True
-                        self.updateSquares()
-        pass
-
-    def updateRow(self):
-        for row in range(9):
-            value_counts = {i: 0 for i in range(1, 10)}
-            row = self.getRow(row)
-            for square in row:
-                if len(square.possibleValues) == 1:
-                    continue
-                for possibleValue in square.possibleValues:
-                    value_counts[possibleValue] += 1
-            for square in row:
-                if len(square.possibleValues) == 1:
-                    continue
-                for possibleValue in square.possibleValues:
-                    if value_counts[possibleValue] == 1:
-                        square.value = possibleValue
-                        square.possibleValues = [possibleValue]
-                        square.squareUpdated = True
-                        self.updated = True
-                        self.updateSquares()
-        pass
-
-    def updateCol(self):
-        for col in range(9):
-            value_counts = {i: 0 for i in range(1, 10)}
-            col = self.getCol(col)
-            for square in col:
-                if len(square.possibleValues) == 1:
-                    continue
-                for possibleValue in square.possibleValues:
-                    value_counts[possibleValue] += 1
-            for square in col:
-                if len(square.possibleValues) == 1:
-                    continue
-                for possibleValue in square.possibleValues:
-                    if value_counts[possibleValue] == 1:
                         square.value = possibleValue
                         square.possibleValues = [possibleValue]
                         square.squareUpdated = True
@@ -177,18 +144,14 @@ class Solver:
 
     def removeNakedPairs(self, nakedPairs, square):
         for pair in nakedPairs:
-            print("Checking pair: ", pair, " on square: ", square.row, square.column, square.possibleValues)
             if square.possibleValues == [pair[0],pair[1]]:
                 print("Skipping square: ", square.row, square.column, square.possibleValues, " because it is a naked pair")
                 return
-            if pair[0] in square.possibleValues:
-                square.possibleValues.remove(pair[0])
-                square.squareUpdated = True
-                print("removed pair[0] from square: ", square.row, square.column, square.possibleValues)
-            if pair[1] in square.possibleValues:
-                square.possibleValues.remove(pair[1])
-                square.squareUpdated = True
-                print("removed pair[1] from square: ", square.row, square.column, square.possibleValues)
+            for i in range(2):
+                if pair[i] in square.possibleValues:
+                    print("removed ", pair[i], "from square: ", square.row, square.column, square.possibleValues)
+                    square.possibleValues.remove(pair[i])
+                    square.squareUpdated = True
             if len(square.possibleValues) == 1 and square.value == 0:
                 square.value = square.possibleValues[0]
                 square.possibleValues = [square.value]
@@ -214,8 +177,6 @@ class Solver:
         loopCount = 0
         while not self.puzzle.isSolved():
             print("Loop: ", loopCount)
-            print(self.puzzle.updated)
-            print(self.puzzle.isSolved())
             if loopCount > 0 and self.puzzle.updated == False and self.puzzle.isSolved() == False:
                 print("Puzzle cannot be solved with current algorithm. Please try a different puzzle.")
                 break
