@@ -1,16 +1,30 @@
-class SudokuBox:
-    def __init__(self, value=None):
+class SudokuSquare:
+    def __init__(self, position, value=None):
         #self.value should be set to 0 if value is None but should be set to value otherwise
         self.value = value if value else 0
         self.possibleValues = [i for i in range(1, 10)]
+        self.row = position//9
+        self.column = position%9
+        self.box = (self.row//3)*3 + self.column//3
     
     def __str__(self):
         return str(self.value)
+    
+    def setPossibleValues(self):
+        # Your code here
+        '''
+        1. If self.value is not 0, set possibleValues to self.value and return
+        2. If self.value is 0, set possibleValues to [1, 2, 3, 4, 5, 6, 7, 8, 9]
+            a. get the row the square is in and remove all values in that row from possibleValues
+            b. get the column the square is in and remove all values in that column from possibleValues
+            c. get the box the square is in and remove all values in that box from possibleValues
+        '''
+        pass
 
 class SudokuPuzzle:
     def __init__(self):
         counter = 0
-        self.puzzle = [[SudokuBox(counter + i + j*9) for i in range(9)] for j in range(9)]
+        self.puzzle = [[SudokuSquare(counter + i + j*9, counter + i + j*9) for i in range(9)] for j in range(9)]
 
     def isValidPuzzle(self):
         # Your code here
@@ -47,7 +61,7 @@ def main():
     x = SudokuPuzzle()
     y = x.getBox(8)
     for box in y:
-        print(box)
+        print(box, box.row, box.column, box.box)
 
 if __name__ == "__main__":
     main()
