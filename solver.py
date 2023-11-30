@@ -11,6 +11,8 @@ class SudokuSquare:
     def __str__(self):
         return str(self.value)
     
+
+    #this is going to always overwite possibleValues with a new list of possible values, write another method to update possibleValues
     def setPossibleValues(self, row, col, box):
         self.updated = False
         previousPossibleValues = self.possibleValues
@@ -181,35 +183,35 @@ class Solver:
 
     def nakedPair(self):
         for box in range(9):
+            boxNakedPairs = set([])
             selectedBox = self.puzzle.getBox(box)
             for square in selectedBox:
-                nakedPairCount = 0
                 if len(square.possibleValues) == 2:
                     for otherSquare in selectedBox:
                         if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
-                            nakedPairCount += 1
-                if nakedPairCount > 0:
-                    print("Box ",box," Naked pair count: ", nakedPairCount)
+                            boxNakedPairs.add((square.possibleValues[0], square.possibleValues[1]))
+            if len(boxNakedPairs) > 0:
+                print("Box ",box," Naked pairs: ", boxNakedPairs)
         for row in range(9):
+            rowNakedPairs = set([])
             selectedRow = self.puzzle.getRow(row)
             for square in selectedRow:
-                nakedPairCount = 0
                 if len(square.possibleValues) == 2:
                     for otherSquare in selectedRow:
                         if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
-                            nakedPairCount += 1
-                if nakedPairCount > 0:
-                    print("Row ",row," Naked pair count: ", nakedPairCount)
+                            rowNakedPairs.add((square.possibleValues[0], square.possibleValues[1]))
+            if len(rowNakedPairs) > 0:
+                print("Row ",row," Naked pairs: ", rowNakedPairs)
         for col in range(9):
+            colNakedPairs = set([])
             selectedCol = self.puzzle.getCol(col)
             for square in selectedCol:
-                nakedPairCount = 0
                 if len(square.possibleValues) == 2:
                     for otherSquare in selectedRow:
                         if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
-                            nakedPairCount += 1
-                if nakedPairCount > 0:
-                    print("Col ",col," Naked pair count: ", nakedPairCount)
+                            colNakedPairs.add((square.possibleValues[0], square.possibleValues[1]))
+            if len(colNakedPairs) > 0:
+                print("Col ",col," Naked pairs: ", colNakedPairs)
         pass
 
     def solve(self):
