@@ -6,7 +6,7 @@ class SudokuSquare:
         self.row = position//9
         self.column = position%9
         self.box = (self.row//3)*3 + self.column//3
-        self.updated = False
+        self.squareUpdated = False
     
     def __str__(self):
         return str(self.value)
@@ -14,12 +14,12 @@ class SudokuSquare:
 
     #this is going to always overwite possibleValues with a new list of possible values, write another method to update possibleValues
     def setPossibleValues(self, row, col, box):
-        self.updated = False
+        self.squareUpdated = False
         previousPossibleValues = self.possibleValues
         #If self.value is not 0, set possibleValues to self.value and return
         if self.value != 0:
             self.possibleValues = [self.value]
-            updated = self.possibleValues != previousPossibleValues
+            self.squareUpdated = self.possibleValues != previousPossibleValues
             return
         #get the row the square is in and remove all values in that row from possibleValues
         self.possibleValues = [value for value in self.possibleValues if value not in [square.value for square in row]]
@@ -27,10 +27,12 @@ class SudokuSquare:
         self.possibleValues = [value for value in self.possibleValues if value not in [square.value for square in col]]
         # get the box the square is in and remove all values in that box from possibleValues
         self.possibleValues = [value for value in self.possibleValues if value not in [square.value for square in box]]
+        if len(self.possibleValues) > len(previousPossibleValues):
+            print("uhoh")
         if len(self.possibleValues) ==1:
             self.value = self.possibleValues[0]
 
-        self.updated = self.possibleValues != previousPossibleValues
+        self.squareUpdated = self.possibleValues != previousPossibleValues
         pass
 
 class SudokuPuzzle:
@@ -82,14 +84,12 @@ class SudokuPuzzle:
         return box
 
     def updateSquares(self):
-        print("Updating squares...")
         box = 0
         for row in self.puzzle:
             for square in row:
                 square.setPossibleValues(self.getRow(square.row), self.getCol(square.column), self.getBox(square.box))
-                self.updated = self.updated or square.updated
-                if square.updated:
-                    print("Updated square: ", square.row, square.column, square.possibleValues)
+                self.updated = self.updated or square.squareUpdated
+                if square.squareUpdated:
                     self.updateSquares()            
         pass
 
@@ -97,7 +97,6 @@ class SudokuPuzzle:
         #list all possible values in box (1.....9) use dictionary to keep track of how many times each value appears
         #if a possible value appears only once, set self.value to that value and return
         for box in range(9):
-            print("Updating box: ", box)
             value_counts = {i: 0 for i in range(1, 10)}
             box = self.getBox(box)
             for square in box:
@@ -109,18 +108,16 @@ class SudokuPuzzle:
                 if len(square.possibleValues) == 1:
                     continue
                 for possibleValue in square.possibleValues:
-                    if value_counts[possibleValue] == 1:
+                    if value_counts[possibleValue] == 1 and square.value == 0:
                         square.value = possibleValue
                         square.possibleValues = [possibleValue]
-                        square.updated = True
-                        print("Updated square: ", square.row, square.column, square.possibleValues)
+                        square.squareUpdated = True
                         self.updated = True
                         self.updateSquares()
         pass
 
     def updateRow(self):
         for row in range(9):
-            print("Updating row: ", row)
             value_counts = {i: 0 for i in range(1, 10)}
             row = self.getRow(row)
             for square in row:
@@ -135,15 +132,13 @@ class SudokuPuzzle:
                     if value_counts[possibleValue] == 1:
                         square.value = possibleValue
                         square.possibleValues = [possibleValue]
-                        square.updated = True
-                        print("Updated square: ", square.row, square.column, square.possibleValues)
+                        square.squareUpdated = True
                         self.updated = True
                         self.updateSquares()
         pass
 
     def updateCol(self):
         for col in range(9):
-            print("Updating col: ", col)
             value_counts = {i: 0 for i in range(1, 10)}
             col = self.getCol(col)
             for square in col:
@@ -158,8 +153,7 @@ class SudokuPuzzle:
                     if value_counts[possibleValue] == 1:
                         square.value = possibleValue
                         square.possibleValues = [possibleValue]
-                        square.updated = True
-                        print("Updated square: ", square.row, square.column, square.possibleValues)
+                        square.squareUpdated = True
                         self.updated = True
                         self.updateSquares()
         pass
@@ -181,50 +175,57 @@ class Solver:
             if self.puzzle.isSolved():
                 return
 
+    def removeNakedPairs(self, nakedPairs, square):
+        for pair in nakedPairs:
+            print("Checking pair: ", pair, " on square: ", square.row, square.column, square.possibleValues)
+            if square.possibleValues == [pair[0],pair[1]]:
+                print("Skipping square: ", square.row, square.column, square.possibleValues, " because it is a naked pair")
+                return
+            if pair[0] in square.possibleValues:
+                square.possibleValues.remove(pair[0])
+                square.squareUpdated = True
+                print("removed pair[0] from square: ", square.row, square.column, square.possibleValues)
+            if pair[1] in square.possibleValues:
+                square.possibleValues.remove(pair[1])
+                square.squareUpdated = True
+                print("removed pair[1] from square: ", square.row, square.column, square.possibleValues)
+            if len(square.possibleValues) == 1 and square.value == 0:
+                square.value = square.possibleValues[0]
+                square.possibleValues = [square.value]
+                square.squareUpdated = True
+                print("Updated square values: ", square.row, square.column, square.possibleValues)
+        pass
     def nakedPair(self):
-        for box in range(9):
-            boxNakedPairs = set([])
-            selectedBox = self.puzzle.getBox(box)
-            for square in selectedBox:
-                if len(square.possibleValues) == 2:
-                    for otherSquare in selectedBox:
-                        if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
-                            boxNakedPairs.add((square.possibleValues[0], square.possibleValues[1]))
-            if len(boxNakedPairs) > 0:
-                print("Box ",box," Naked pairs: ", boxNakedPairs)
-        for row in range(9):
-            rowNakedPairs = set([])
-            selectedRow = self.puzzle.getRow(row)
-            for square in selectedRow:
-                if len(square.possibleValues) == 2:
-                    for otherSquare in selectedRow:
-                        if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
-                            rowNakedPairs.add((square.possibleValues[0], square.possibleValues[1]))
-            if len(rowNakedPairs) > 0:
-                print("Row ",row," Naked pairs: ", rowNakedPairs)
-        for col in range(9):
-            colNakedPairs = set([])
-            selectedCol = self.puzzle.getCol(col)
-            for square in selectedCol:
-                if len(square.possibleValues) == 2:
-                    for otherSquare in selectedRow:
-                        if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
-                            colNakedPairs.add((square.possibleValues[0], square.possibleValues[1]))
-            if len(colNakedPairs) > 0:
-                print("Col ",col," Naked pairs: ", colNakedPairs)
+        dataSelectors = [self.puzzle.getBox, self.puzzle.getRow, self.puzzle.getCol]
+        for selector in dataSelectors:
+            for i in range(9):
+                nakedPairs = set([])
+                data = selector(i)
+                for square in data:
+                    if len(square.possibleValues) == 2:
+                        for otherSquare in data:
+                            if square != otherSquare and square.possibleValues == otherSquare.possibleValues:
+                                nakedPairs.add((square.possibleValues[0], square.possibleValues[1]))
+                for square in data:
+                    self.removeNakedPairs(nakedPairs, square)
         pass
 
     def solve(self):
         loopCount = 0
         while not self.puzzle.isSolved():
             print("Loop: ", loopCount)
+            print(self.puzzle.updated)
+            print(self.puzzle.isSolved())
+            if loopCount > 0 and self.puzzle.updated == False and self.puzzle.isSolved() == False:
+                print("Puzzle cannot be solved with current algorithm. Please try a different puzzle.")
+                break
             loopCount += 1
             self.update()
             print(self.puzzle)
-            if self.puzzle.updated == False and self.puzzle.isSolved() == False:
-                print("Puzzle cannot be solved with current algorithm. Please try a different puzzle.")
-                break
             self.puzzle.updated = False
+            for squares in self.puzzle.puzzle:
+                for square in squares:
+                    square.squareUpdated = False
         pass
     
 
@@ -277,8 +278,9 @@ def main():
     else: 
         print("Invalid input. Please type 'y' or 'n'.")
         return
-
+    print("Input puzzle: ")
     x = Solver(rows)
+    print(x.puzzle)
     x.solve()
 
 if __name__ == "__main__":
