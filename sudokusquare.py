@@ -5,7 +5,7 @@ class SudokuSquare:
         self.row = position//9
         self.col = position%9
         self.box = (self.row//3)*3 + self.col//3
-        self.possibleValues = [i for i in range(1,10)]
+        self.possibleValues = []
     
     def __str__(self):
         return str(self.value)
