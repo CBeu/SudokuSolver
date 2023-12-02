@@ -57,9 +57,6 @@ def main():
     print(x.puzzle)
     print("Solving...")
     x.solve()
-    print("Result: ")
-    print(x.puzzle)
-    print("Rounds: " + str(x.rounds))
 
 if __name__ == "__main__":
     main()

@@ -35,10 +35,8 @@ class SudokuPuzzle:
         for row in self.puzzle:
             for square in row:
                 if square.value == 0:
-                    self.solved = False
                     return False
-        self.solved = True and self.isValidPuzzle()
-        return self.solved
+        return True and self.isValidPuzzle()
 
     def getRow(self, row):
         return self.puzzle[row]

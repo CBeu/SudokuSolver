@@ -8,10 +8,7 @@ class Solver:
 
     def incrementRounds(self):
         self.rounds += 1
-    '''
-    while not puzzle.isSolved():
-    
-    '''
+        
     def solve(self):
         squares = [square for row in self.puzzle.puzzle for square in row]
         print("Initializing...")
@@ -21,28 +18,34 @@ class Solver:
             return
         print("Initialized.")
         self.backTrack(squares)
+        print("Result: ")
+        print(self.puzzle)
+        print("Rounds: " + str(self.rounds))
     
     def initialize(self, squares:[SudokuSquare]):
-        self.incrementRounds()
         for square in squares:
             if square.value == 0:
                 if len(square.getPossibleValues(self.puzzle)) == 1:
+                    square.value = square.getPossibleValues(self.puzzle)[0]
                     self.initialize(squares)
         pass
 
     def backTrack(self, squares:[SudokuSquare]):
-        print("Backtracking...")
         self.incrementRounds()
         if self.puzzle.isSolved():
-            return
+            print("Solved with backtracking.")
+            return True
         for square in squares:
-            if square.value != 0:
+            if square.value == 0:
+                possibleValues = square.getPossibleValues(self.puzzle)
+                for value in possibleValues:
+                    square.value = value
                 
-                pass
-            pass
-        pass
+                    if self.backTrack(squares):
+                        return True
+                    square.value = 0
+                return False
+        print("Backtrack failed.")
+        return False
 
-    def makeGuess(self, square: SudokuSquare):
-        print("Guessing...")
-        guess = square.getPossibleValues(self.puzzle)[0]
-        pass
+    
