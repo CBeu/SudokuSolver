@@ -7,14 +7,16 @@ class SudokuSquare:
         self.box = (self.row//3)*3 + self.col//3
         self.possibleValues = []
     
-    def __str__(self):
+    def __str__(self) -> str:
         return str(self.value)
 
-    def getPossibleValues(self, puzzle):
+    def getPossibleValues(self, puzzle) ->list[int]:
         if self.value != 0:
-            return [self.value]
-        possibleColValues = [value for value in range(1,10) if value not in [square.value for square in puzzle.getRow(self.row)]]
-        possibleRowValues = [value for value in range(1,10) if value not in [square.value for square in puzzle.getCol(self.col)]]
-        possibleBoxValues = [value for value in range(1,10) if value not in [square.value for square in puzzle.getBox(self.box)]]
-        self.possibleValues = list(set(possibleColValues).intersection(possibleRowValues, possibleBoxValues))
+            return list(self.value)
+        allValues = set(range(1,10))
+        possibleColValues = set(square.value for square in puzzle.getRow(self.row))
+        possibleRowValues = set(square.value for square in puzzle.getCol(self.col))
+        possibleBoxValues = set(square.value for square in puzzle.getBox(self.box))
+        #Return a list of possible values that are in all three lists
+        self.possibleValues = list(allValues-possibleColValues-possibleRowValues-possibleBoxValues)
         return self.possibleValues

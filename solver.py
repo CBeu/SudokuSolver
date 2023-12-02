@@ -35,6 +35,7 @@ class Solver:
         pass
 
     def backTrack(self, squares:[SudokuSquare]):
+        squares.sort(key=lambda square: len(square.possibleValues))
         self.incrementRounds()
         #Check to see if the puzzle is solved
         if self.puzzle.isSolved():
@@ -49,7 +50,7 @@ class Solver:
                     #Try to solve the puzzle with the value from possible values
                     square.value = value
                     #Check to see if the puzzle is solved after trying the value
-                    if self.backTrack(squares):
+                    if self.puzzle.isSolved() or self.backTrack(squares):
                         return True
                     #If the puzzle is not solved, backtrack
                     square.value = 0
