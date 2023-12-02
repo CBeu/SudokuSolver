@@ -1,4 +1,6 @@
 from solver import Solver
+from sudokupuzzle import SudokuPuzzle
+from sudokusquare import SudokuSquare
 def main():
     rows = []
     easyPuzzleRows = [[3,9,0,8,0,0,0,0,0],
@@ -31,6 +33,8 @@ def main():
                      [0,7,0,0,2,4,3,0,0],
                      [0,0,4,0,8,7,0,0,2]]
     
+    emptyPuzzleRows = [[0 for i in range(9)] for j in range(9)]
+    
     choice = input("Enter Type 'y' to enter a row manually or 'n' to use a hard-coded puzzle: ").lower()
     if choice == 'y':
         for i in range(9):
@@ -51,7 +55,11 @@ def main():
     print("Input puzzle: ")
     x = Solver(rows)
     print(x.puzzle)
+    print("Solving...")
     x.solve()
+    print("Result: ")
+    print(x.puzzle)
+    print("Rounds: " + str(x.rounds))
 
 if __name__ == "__main__":
     main()
