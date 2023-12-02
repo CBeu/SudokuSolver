@@ -32,11 +32,7 @@ class SudokuPuzzle:
         return True
 
     def isSolved(self):
-        for row in self.puzzle:
-            for square in row:
-                if square.value == 0:
-                    return False
-        return True and self.isValidPuzzle()
+        return not any(square.value == 0 for row in self.puzzle for square in row) and self.isValidPuzzle()
 
     def getRow(self, row):
         return self.puzzle[row]
@@ -47,8 +43,4 @@ class SudokuPuzzle:
     def getBox(self, boxIndex):
         startRowIndex = (boxIndex//3) *3
         startColIndex = (boxIndex%3) * 3
-        rows = [self.getRow(i) for i in range(startRowIndex, startRowIndex + 3)]
-        box = []
-        for row in rows:
-            box += row[startColIndex:startColIndex + 3]
-        return box
+        return[self.puzzle[i][j] for i in range(startRowIndex, startRowIndex+3) for j in range(startColIndex, startColIndex+3)]
